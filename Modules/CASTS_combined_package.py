@@ -30,19 +30,20 @@ This script will combine all other sources, also contains QA/QC functions.
 '''
 TESTING AREA
 path = {}
-path['path1'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/BIO_Climate/NetCDF/BIO_Climate_Databases/' #BIO, 1913-2010
-path['path2'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/BIO_Climate/NetCDF/database_2008-2017/' #BIO, 2008-2017
-path['path3'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/BIO_Climate/NetCDF/database_2018/' #BIO, 2018
-path['path4'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/NAFC_Oceanography/4_outliers/' #NAFC, 1912-2022
-path['path5'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/CIOOS_NAFC/data_processed//nc_old/' #CIOOS_NAFC, 1983-2023
-path['path6'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/CIOOS_ERDDAP/data_processed/' #CIOOS-ERRDAP, 1996-2020
-path['path7'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/NEFSC/yearly_netcdf_files/' #NEFSC, 1981-2021
-path['path8'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/NAFC_Aquaculture/data_processed/' #CTD Andry, 2009-2020
-path['path9'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/IML/data_processed/' # MLI-Sourced, 1972-2022
-path['path10'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/NCEI_GTSPP/data_processed/bottom_flagged/' # NCEI-GTSPP, 1990-2019
-path['path11'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/Polar_Data_Catalogue/data_product/netcdf_yearly/' # Polar Data Catalogue, 2002-2020
-path['path12'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/IEO_Spain/netcdf_yearly/' # IEO Spain, 2019-2021
-path['path13'] = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/Other/Freds_Files/netcdf_yearly/' #Marine Institute, 2000-2008
+path['path1'] = directory+'Data_Input/BIO_Climate/NetCDF/BIO_Climate_Databases/' #BIO, 1913-2010
+path['path2'] = directory+'Data_Input/BIO_Climate/NetCDF/database_2008-2017/' #BIO, 2008-2017
+path['path3'] = directory+'Data_Input/BIO_Climate/NetCDF/database_2018/' #BIO, 2018
+path['path4'] = directory+'Data_Input/NAFC_Oceanography/4_outliers/' #NAFC, 1999-2022
+path['path5'] = directory+'Data_Input/CIOOS_NAFC/data_processed/' #CIOOS_NAFC, 1983-2023
+path['path6'] = directory+'Data_Input/CIOOS_ERDDAP/data_processed/' #CIOOS-ERRDAP, 1996-2020
+path['path7'] = directory+'Data_Input/NEFSC/yearly_netcdf_files/' #NEFSC, 1981-2021
+path['path8'] = directory+'Data_Input/NAFC_Aquaculture/data_processed/' #CTD Andry, 2009-2020
+path['path9'] = directory+'Data_Input/IML/data_processed/' # MLI-Sourced, 1972-2022
+path['path10'] = directory+'Data_Input/NCEI_GTSPP/data_processed/bottom_flagged/' # NCEI-GTSPP, 1990-2019
+path['path11'] = directory+'Data_Input/Polar_Data_Catalogue/data_product/netcdf_yearly/' # Polar Data Catalogue, 2002-2020
+path['path12'] = directory+'Data_Input/IEO_Spain/netcdf_yearly/' # IEO Spain, 2019-2021
+path['path13'] = directory+'Data_Input/Other/Freds_Files/netcdf_yearly/' #Marine Institute, 2000-2008
+path['path14'] = directory+'Data_Input/WOD/data_processed/' #World Ocean Database, 1873-1910
 path_source = {}
 path_source['path1'] = 'Climate'
 path_source['path2'] = 'BIO-OMM'
@@ -57,8 +58,9 @@ path_source['path10'] = 'NCEI'
 path_source['path11'] = 'Polar-Data-Catalogue'
 path_source['path12'] = 'EU-NAFO'
 path_source['path13'] = 'Marine-Institute-NL'
-years=np.arange(1912,2024+1).astype(str)
-file_output='/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Products/1_combined_raw/'
+path_source['path14'] = 'WOD'
+years=np.arange(1873,2024+1).astype(str)
+file_output=directory+'Data_Products/1_combined_raw/'
 '''
 
 
@@ -80,6 +82,10 @@ def combine_netcdf(
 		for i in path.keys():
 			if os.path.isfile(path[i]+str(year)+'.nc') == True:
 				ds[i] = xr.open_dataset(path[i]+str(year)+'.nc')
+
+		#Determine if data is available
+		if len(ds) == 0:
+			continue
 
 		#Some variables will need to be renamed for consistency
 		for i in ds.keys():
@@ -370,7 +376,10 @@ def area_isolate(
 	for year in years:
 
 		#Open the netcdf file
-		ds = xr.open_dataset(file_input+str(year)+'.nc')
+		if os.path.exists(file_input+str(year)+'.nc'):
+			ds = xr.open_dataset(file_input+str(year)+'.nc')
+		else:
+			continue
 
 		#Perform the cutoff for the temperature and salinity
 		#Pre-define cut-offs for each variable that are non-realistic
@@ -475,7 +484,10 @@ def depth_filter(
 	for year in years:
 
 		#Open up the relevant data set
-		ds = xr.open_dataset(file_input+year+'.nc')
+		if os.path.exists(file_input+str(year)+'.nc'):
+			ds = xr.open_dataset(file_input+year+'.nc')
+		else:
+			continue
 
 		#Record all the latitudes and longitude
 		ds_lon = ds.longitude.values
@@ -565,7 +577,10 @@ def outlier_check(
 	for year in years[:]:
 
 		#Import the netcdf dataset, one year at a time
-		ds = xr.open_dataset(file_input+str(year)+'.nc')
+		if os.path.exists(file_input+str(year)+'.nc'):
+			ds = xr.open_dataset(file_input+str(year)+'.nc')
+		else:
+			continue
 
 		#Determine the coresponding coordinates for each cast in the climatology
 		#Define the lat/lon for the NAFC
@@ -732,7 +747,10 @@ def station_check(
 	for year in years:
 
 		#Import the dataset
-		ds = xr.open_dataset(file_input+year+'.nc')
+		if os.path.exists(file_input+str(year)+'.nc'):
+			ds = xr.open_dataset(file_input+year+'.nc')
+		else:
+			continue
 		ds = ds.sel(time = (ds.instrument_ID != 'ML'))
 
 		#Import the latitude, longitude, station ID

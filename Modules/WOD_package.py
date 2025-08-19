@@ -35,9 +35,9 @@ def merge_netcdf(
 	'''
 
 	#Temporary
-	file_input = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/WOD/OSD_MBT/'
-	file_output = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/WOD/data_processed/'
-	max_depth = 5000
+	#file_input = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/WOD/OSD_MBT/'
+	#file_output = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/WOD/data_processed/'
+	#max_depth = 5000
 
 	#Determine all file names
 	file_name = os.listdir(file_input)

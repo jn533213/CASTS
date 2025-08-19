@@ -22,6 +22,7 @@ import IEO_Spain_package as IEO_Spain
 import NCEI_GTSPP_package as NCEI_GTSPP
 import NEFSC_package as NEFSC
 import Polar_Data_Catalogue_package as Polar_Data_Catalogue
+import WOD_package as WOD
 import CASTS_combined_package as CASTS_combined
 
 '''
@@ -129,7 +130,7 @@ print('NAFC Aquaculture -> yearly netcdf done!')
 #Update yearly (with info from Jean-Luc)
 
 #Convert to yearly files
-file_input = directory+'Data_Input/IML/data_raw/2025_Apr/'
+file_input = directory+'Data_Input/IML/data_raw/2025_Aug/'
 file_output = directory+'Data_Input/IML/data_processed/'
 IML.raw_to_netcdf(file_input,file_output)
 print('IML -> yearly netcdf done!')
@@ -243,6 +244,17 @@ print('Polar Data Catalogue -> yearly netcdf done!')
 
 
 ##########################################################################################################
+#10. World Ocean Database
+#Update yearly (there's a website)
+
+#Convert the folders to netcdf
+file_input = directory+'Data_Input/Data_Input/WOD/OSD_MBT/'
+file_output = directory+'Data_Input/WOD/data_processed/'
+WOD.merge_netcdf(file_input,file_output)
+print('World Ocean Database (WOD) -> yearly netcdf done!')
+
+
+##########################################################################################################
 '''----------------------------------------------------------------------------------------------------'''
 ##########################################################################################################
 #Combine all sources together
@@ -262,6 +274,7 @@ path['path10'] = directory+'Data_Input/NCEI_GTSPP/data_processed/bottom_flagged/
 path['path11'] = directory+'Data_Input/Polar_Data_Catalogue/data_product/netcdf_yearly/' # Polar Data Catalogue, 2002-2020
 path['path12'] = directory+'Data_Input/IEO_Spain/netcdf_yearly/' # IEO Spain, 2019-2021
 path['path13'] = directory+'Data_Input/Other/Freds_Files/netcdf_yearly/' #Marine Institute, 2000-2008
+path['path14'] = directory+'Data_Input/WOD/data_processed/' #World Ocean Database, 1873-1910
 path_source = {}
 path_source['path1'] = 'Climate'
 path_source['path2'] = 'BIO-OMM'
@@ -276,7 +289,8 @@ path_source['path10'] = 'NCEI'
 path_source['path11'] = 'Polar-Data-Catalogue'
 path_source['path12'] = 'EU-NAFO'
 path_source['path13'] = 'Marine-Institute-NL'
-years=np.arange(1912,2024+1).astype(str)
+path_source['path14'] = 'WOD'
+years=np.arange(1873,2024+1).astype(str)
 file_output=directory+'Data_Products/1_combined_raw/'
 CASTS_combined.combine_netcdf(path,path_source,years,file_output)
 
