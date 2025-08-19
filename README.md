@@ -1,4 +1,4 @@
-Canadian Atlantic Shelf Temperature Salinity (CASTS): A century of temperature and salinity observations in the Northwest Atlantic and Eastern Arctic
+**Canadian Atlantic Shelf Temperature Salinity (CASTS)**: A century of temperature and salinity observations in the Northwest Atlantic and Eastern Arctic
 
 As part of the new Fisheries Act, Fisheries and Oceans Canada (DFO) has made it a priority to disseminate its data publicly. 
 The project proposed here is to create an open-access data product that includes most of the historical temperature and salinity profiles collected in Atlantic Canada and the eastern Arctic.
