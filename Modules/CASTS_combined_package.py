@@ -399,6 +399,9 @@ def area_isolate(
 		#Isolate for the region of interest
 		ds = ds.sel(time = (ds.latitude >= 35)*(ds.latitude <= 80))
 		ds = ds.sel(time = (ds.longitude >= -100)*(ds.longitude <= -42))
+		#Stop if file is empty
+		if ds.time.size == 0:
+			continue
 
 		#TEMPORARY
 		#Remove NAFC-Oceanography casts startiong with 2017_79 during 2017 or 2012_39 for 2012
@@ -547,6 +550,8 @@ def depth_filter(
 
 		#Save the casts with the depth-filtered casts removed
 		ds = ds.sel(time = ~depth_filter)
+		if ds.time.size == 0:
+			continue
 
 		#Flatten the arrays to ensure they save properly
 		for i in ['trip_ID','source','instrument_ID','instrument_type','file_names','station_ID','sounder_depth']:
@@ -701,6 +706,8 @@ def outlier_check(
 
 		#Remove the casts 
 		ds = ds.sel(time = ~cast_removal)
+		if ds.time.size == 0:
+			continue
 
 		#Save the combined dataset
 		#Flatten the arrays to ensure they save properly
