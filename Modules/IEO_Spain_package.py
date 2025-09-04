@@ -195,7 +195,7 @@ def raw_to_netcdf(
 		datatypes = nc_out.createVariable('datatype', str, ('time'), zlib=True)
 		station_ids = nc_out.createVariable('station_id', str, ('time'), zlib=True)
 		file_names = nc_out.createVariable('file_names', str, ('time'), zlib=True)
-		
+
 		#Create 2D variables
 		temp = nc_out.createVariable('temperature', np.float32, ('time', 'level'), zlib=True, fill_value=-9999)
 		saln = nc_out.createVariable('salinity', np.float32, ('time', 'level'), zlib=True, fill_value=-9999)
@@ -291,4 +291,144 @@ def netcdf_yearly(
 		ds_isolate.to_netcdf(file_output+str(year)+'.nc',\
 			encoding={'time':{'units': 'seconds since 1900-01-01 00:00:00', 'calendar': 'gregorian'}})
 		ds_isolate.close()
+
+
+
+
+
+#MAKE INTO A FUNCTION - TO DO NOT FINISHED YET
+max_depth = 5000
+
+#Read the new text file
+file_input = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/IEO_Spain/data_raw/NAFO_EU/'
+pd_data = pd.read_csv(file_input+'121568.txt',skiprows=90,header=0,delimiter='\t',low_memory=False)
+
+#Define the time and set as the index
+pd_data.index = pd.to_datetime(pd_data['yyyy-mm-ddThh:mm:ss.sss'])
+pd_data.index.name = 'time'
+pd_data = pd_data.drop(columns=['yyyy-mm-ddThh:mm:ss.sss'])
+
+#Rename some of the variables
+pd_data = pd_data.rename(
+	columns={'Longitude [degrees_east]':'longitude',
+	'Latitude [degrees_north]':'latitude',
+	'Bot. Depth [m]':'bottom_depth',
+	'Pressure [decibar]':'pressure',
+	'Temperature [degrees Celsius]':'temperature',
+	'Salinity [psu]':'salinity',
+	})
+
+#Isolate data based upon depths and unique casts
+pd_data['Cruise_Station'] = pd_data['Cruise']+pd_data['Station']
+cruise_stations = np.unique((pd_data['Cruise']+pd_data['Station']).values)
+
+#Define the 1d variables and save location
+vars_1d = ['Cruise','Station','Type','longitude','latitude','bottom_depth','EDMO_code',]
+vars_1d_dtype = ['<U20','<U20','<U20',float,float,float,float]
+pd_1d = {}
+for i,var in enumerate(vars_1d):
+	pd_1d[var] = np.empty(cruise_stations.size,dtype=vars_1d_dtype[i])
+pd_1d['Time'] = np.empty(cruise_stations.size,dtype='datetime64[ns]')
+
+#Define the 2d variables and save location
+vars_2d = ['temperature','salinity']
+pd_2d = {}
+for var in vars_2d:
+	pd_2d[var] = np.empty((cruise_stations.size,max_depth),dtype=float)
+
+#Cycle through each of the cruise stations
+for i,cs in enumerate(cruise_stations):
+	#Isolate the profile of interest
+	pd_slice = pd_data[pd_data['Cruise_Station'] == cs]
+	#Record the time
+	pd_1d['Time'][i] = pd_slice.index.values[0]
+	#Record the 1D variables
+	for var in vars_1d:
+		if pd_slice[var].unique().size == 1:
+			pd_1d[var][i] = pd_slice[var].values[0]
+		else:
+			pd_1d[var][i] = np.nan
+			print('Mismatched data, Cruise ID: '+cs+', Variable: '+var)
+	#Record the 2D variables
+	for var in vars_2d:
+		pd_2d[var][i] = stats.binned_statistic(
+			pd_slice['pressure'].values,
+			pd_slice[var].values,
+			'mean',
+			bins = np.arange(max_depth+1)
+			).statistic
+
+#Remove problem measurements
+pd_2d['salinity'][pd_2d['salinity'] < 0] = np.nan
+pd_2d['temperature'][pd_2d['temperature'] < -2] = np.nan
+pd_1d['bottom_depth'][pd_1d['bottom_depth'] >= 5000.] = np.nan
+
+
+
+#Save in NetCDF format
+#Set up the .nc file
+file_output = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/IEO_Spain/data_raw/NAFO_EU/'
+nc_out = nc.Dataset(file_output+'EU_NAFO_together.nc','w')
+
+#File information
+nc_out.Conventions = 'CF-1.6' #Ask Fred what this means
+nc_out.title = 'NAFO-EU-Spain-SL Grouped Netcdf File' #Temporary title for the .nc file
+nc_out.institution = 'Northwest Atlantic Fisheries Centre, Fisheries and Oceans Canada'
+nc_out.description = 'Output by jonathan.coyne@dfo-mpo.gc.ca'
+nc_out.history = 'Created ' + tt.ctime(tt.time())
+
+#Create dimensions
+time = nc_out.createDimension('time', None) #use date2 for this
+level = nc_out.createDimension('level', max_depth)
+
+#Create coordinate variables
+times = nc_out.createVariable('time', np.float64, ('time',))
+levels = nc_out.createVariable('level', np.int32, ('level',))
+
+#Sort the variables according to time
+filt = np.argsort(pd_1d['Time'])
+
+#Create 1D variables
+ds_1d = {}
+for i,var in enumerate(vars_1d):
+	ds_1d[var] = nc_out.createVariable(var,vars_1d_dtype[i],('time'),zlib=True)
+	ds_1d[var][:] = pd_1d[var][filt]
+
+#Define the 1D variable attributes
+ds_1d['latitude'].units = 'degree_north'
+ds_1d['longitude'].units = 'degree_east'
+times.units = 'seconds since 1900-01-01 00:00:00'
+times.calendar = 'gregorian'
+levels.units = 'dbar'
+levels.standard_name = "pressure"
+
+#Create the 2D variables
+ds_2d = {}
+for var in vars_2d:
+	ds_2d[var] = nc_out.createVariable(var, np.float32, ('time','level'), zlib=True, fill_value=-9999)
+	ds_2d[var][:,:] = pd_2d[var][filt]
+
+#Define the 2D variable attributes
+ds_2d['temperature'].units = 'Celsius'
+ds_2d['temperature'].long_name = "Water Temperature" # (may be use to label plots)
+ds_2d['temperature'].standard_name = "sea_water_temperature"
+ds_2d['salinity'].long_name = "Practical Salinity"
+ds_2d['salinity'].standard_name = "sea_water_salinity"
+ds_2d['salinity'].units = "1"
+ds_2d['salinity'].valid_min = 0
+
+#Convert to time stamps
+time_stamps = [pd.Timestamp(i).to_pydatetime() for i in pd_1d['Time'][filt]]
+times[:] = nc.date2num(time_stamps, units=times.units, calendar=times.calendar)
+levels[:] = np.arange(max_depth)
+#Save and close the .nc file
+nc_out.close()
+
+#Convert into yearly files
+ds = xr.open_dataset(file_output+'EU_NAFO_together.nc')
+years = np.unique(ds['time.year'].values)
+#Cycle through each year
+for year in years:
+	ds_slice = ds.isel(time=ds['time.year'] == year)
+	ds_slice.to_netcdf(file_output+str(year)+'.nc')
 
