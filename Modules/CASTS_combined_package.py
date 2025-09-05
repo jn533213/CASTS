@@ -42,8 +42,9 @@ path['path9'] = directory+'Data_Input/IML/data_processed/' # MLI-Sourced, 1972-2
 path['path10'] = directory+'Data_Input/NCEI_GTSPP/data_processed/bottom_flagged/' # NCEI-GTSPP, 1990-2019
 path['path11'] = directory+'Data_Input/Polar_Data_Catalogue/data_product/netcdf_yearly/' # Polar Data Catalogue, 2002-2020
 path['path12'] = directory+'Data_Input/IEO_Spain/netcdf_yearly/' # IEO Spain, 2019-2021
-path['path13'] = directory+'Data_Input/Other/Freds_Files/netcdf_yearly/' #Marine Institute, 2000-2008
-path['path14'] = directory+'Data_Input/WOD/data_processed/' #World Ocean Database, 1873-1910
+path['path13'] = directory+'Data_Input/IEO_Spain/netcdf_yearly/EU_NAFO/' # IEO Spain, 1988-2020
+path['path14'] = directory+'Data_Input/Other/Freds_Files/netcdf_yearly/' #Marine Institute, 2000-2008
+path['path15'] = directory+'Data_Input/WOD/data_processed/' #World Ocean Database, 1873-1910
 path_source = {}
 path_source['path1'] = 'Climate'
 path_source['path2'] = 'BIO-OMM'
@@ -57,8 +58,9 @@ path_source['path9'] = 'MLI'
 path_source['path10'] = 'NCEI'
 path_source['path11'] = 'Polar-Data-Catalogue'
 path_source['path12'] = 'EU-NAFO'
-path_source['path13'] = 'Marine-Institute-NL'
-path_source['path14'] = 'WOD'
+path_source['path13'] = 'EU-NAFO'
+path_source['path14'] = 'Marine-Institute-NL'
+path_source['path15'] = 'WOD'
 years=np.arange(1873,2024+1).astype(str)
 file_output=directory+'Data_Products/1_combined_raw/'
 '''
@@ -113,8 +115,12 @@ def combine_netcdf(
 				ds[i] = ds[i].rename({'instrument_id': 'instrument_type'})
 				ds[i] = ds[i].rename({'station_id': 'comments'})
 			if i == 'path13':
+				ds[i] = ds[i].rename({'Cruise': 'trip_ID'})
+				ds[i] = ds[i].rename({'Station': 'comment'})
+				ds[i] = ds[i].rename({'bottom_depth': 'sounder_depth'})
+				ds[i] = ds[i].rename({'instrument_id': 'instrument_type'})
+			if i == 'path14':
 				ds[i] = ds[i].rename({'mission_id': 'trip_ID'})
-
 
 		#Isolate for the variables of interest
 		variables = np.array([
@@ -918,7 +924,7 @@ def station_check(
 		ds.to_netcdf(file_output+str(year)+'.nc',
 			encoding={'time':{'units': 'seconds since 1900-01-01 00:00:00', 'calendar': 'gregorian'}})
 		ds.close()
-		exp = 'ncks --mk_rec_dmn time '+file_output+year+'.nc '+file_output+year+'.nc'
+		exp = 'ncks -O --mk_rec_dmn time '+file_output+year+'.nc '+file_output+year+'.nc'
 		os.system(exp)
 		#Compress all files for memory purposes
 		exp = 'nccopy -d 9 '+file_output+year+'.nc '+file_output+'compressed/'+year+'.nc'
