@@ -44,7 +44,7 @@ directory = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/'
 #Update yearly
 
 #Define the years of interest
-years = np.arange(1912,2023+1).astype(str)
+years = np.arange(1912,2025+1).astype(str)
 
 #Cycle through each year
 for year in years[:]:
