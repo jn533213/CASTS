@@ -28,7 +28,7 @@ This script will combine all other sources, also contains QA/QC functions.
 
 
 '''
-TESTING AREA
+#TESTING AREA
 path = {}
 path['path1'] = directory+'Data_Input/BIO_Climate/NetCDF/BIO_Climate_Databases/' #BIO, 1913-2010
 path['path2'] = directory+'Data_Input/BIO_Climate/NetCDF/database_2008-2017/' #BIO, 2008-2017
@@ -194,6 +194,29 @@ def combine_netcdf(
 		#Create a variable marking duplicates
 		duplicates_flag = np.full(ds_merged.time.shape,False) 
 
+		#Organize instrument ID into categories
+		instrument_call = {}
+		instrument_call['CT'] = ['19899','19P-7','19P45','19P53','GL','OLABS','STD12','NBmun','0CTD','0CTD1','1CTD','1CTD1','CD','CT','CTD','CU','FAPCD','FAPCU','GLCTD','GLctd','MEDCD','S0000','S0002','S0036','S0038','S0078','S0097','S0103','S0118','S0129','S0212','S0277','S0281','S0344','S0394','S0454','S0466','S0580','S0582','S0583','S0674','S0688','S0689','S0690','S0691','S0692','S0758','S0803','S0845','S0846','S0847','S0910','S0911','S0912','S0935','S1003','S1019','S1020','S1021','S1098','S1101','S1145','S1146','S1221','S1237','S1238','S1247','S1257','S1308','S1309','S1310','S1311','S1312','S1313','S1314','S1315','S1316','S1317','S1318','S1319','S1460','S2245','S2246','S2247','S2248','S4016','S4017','S4018','S4019','S4020','S4578','S4579','S4580','S4581','S4582','S4776','S4777','S5117','S7849','S7853','S7854','S7855','S7992','S8013','S8014','S9999','SB', 'SB002', 'SB036', 'SB038','SB12','SB279','SB280','SB394','SB450','SB453','SB454','SB455','SB580','SB581','SB583','SB688','SB689','SB690','SB691','SB692','SB73','SB74','SB81','SB82','SB822','SB83','SB845','SB880','SB890','SB900','SB910','SB920','SB935','SBMUN']
+		instrument_call['BO'] = ['BO','FAPBO','FAPbo','FRCBO']
+		instrument_call['BF'] = ['BF','FAPBF']
+		instrument_call['TO'] = ['TO','FAPTO']
+		instrument_call['DT'] = ['DT','BT']
+		instrument_call['MB'] = ['MB']
+		instrument_call['XB'] = ['XB','XBT05','XBT06','XBT07','XBT10']
+		instrument_call['PF'] = ['PF','B3']
+		instrument_call[''] = ['nan','21573.0']
+
+		#Define the new instrument_ID data
+		ds_instrument_ID = ds_merged.instrument_ID.values
+		new_instrument_ID = np.full(time.size,'',dtype='<U32')
+
+		#Organize the measurements into categories
+		for i,value in enumerate(ds_instrument_ID):
+			for ii in instrument_call:
+				if np.isin(value, instrument_call[ii]):
+					new_instrument_ID[i] = ii
+					break
+
 		#Cycle through each point 
 		for i in np.arange(time.size):
 
@@ -231,18 +254,18 @@ def combine_netcdf(
 						flagged_source = flagged_source[flagged_source != 'BIO-OMM']
 
 					#Determine the number of temperature and salinity measurements in each
-					temp = ds_merged.temperature[flagged_casts].values
-					saln = ds_merged.salinity[flagged_casts].values
-
+					temp = ds_merged.temperature[flagged_index].values
+					saln = ds_merged.salinity[flagged_index].values
 					#Determine the number of recordings in each cast
 					nom_temp = (~np.isnan(temp)).sum(axis=1)
 					nom_saln = (~np.isnan(saln)).sum(axis=1)
 
-					#If climate and NAFC_oceanography are present, take climate
-					if flagged_source.size == 2:
-						if np.isin('Climate',flagged_source) and np.isin('NAFC-Oceanography',flagged_source):
-							duplicates_flag[flagged_index[flagged_source == 'NAFC-Oceanography']] = True
+					#Record the instrument ID
+					dup_instrID = new_instrument_ID[flagged_casts]
+					no_id = np.unique(dup_instrID)
+					no_id = no_id[no_id != ''] #remove instances of no instrument ID specified
 
+<<<<<<< HEAD
 					#If NAFC_oceanography and CIOOS_NAFC are present, take CIOOS_NAFC
 					if flagged_source.size == 2:
 						if np.isin('CIOOS_NAFC',flagged_source) and np.isin('NAFC-Oceanography',flagged_source):
@@ -324,9 +347,142 @@ def combine_netcdf(
 								duplicates_flag[flagged_index[flagged_source == 'Climate'][flagged_index[flagged_source == 'Climate'] != flagged_index[flagged_source == 'Climate'][place1]]] = True
 
 					#If Climate is not present
+=======
+					#Determine which instrument nans should included with
+					if np.sum(dup_instrID == '').sum() == 0:
+						nans_include = {}
+						for ii in no_id:
+							nans_include[ii] = []
+					elif no_id.size == 0:
+						nans_include = {'':flagged_index}
+					elif no_id.size == 1:
+						nans_include = {no_id[0]:flagged_index[dup_instrID == '']}
+>>>>>>> c02fff5785270773b3117f066306cde63cd84fc4
 					else:
-						#Determine which cast has the highest number of measurements and keep that one
-						duplicates_flag[flagged_index[flagged_index != flagged_index[np.argmax(nom_temp+nom_saln)]]] = True
+						#Determine where all the nans are
+						nan_index = flagged_index[dup_instrID == '']
+						nans_include = {}
+						for ii in no_id:
+							nans_include[ii] = []
+						#Cycle through each
+						for nan_id in nan_index:
+							#Determine the number of measurements where nans are
+							diff = np.zeros(no_id.size)
+							for ii,grp in enumerate(no_id):
+								Tdiff = np.abs(np.mean(nom_temp[dup_instrID == grp]) - nom_temp[flagged_index == nan_id])
+								Sdiff = np.abs(np.mean(nom_saln[dup_instrID == grp]) - nom_saln[flagged_index == nan_id])
+								#Determine which averages closest to 0
+								diff[ii] = np.mean([Tdiff,Sdiff])
+							nans_include[no_id[np.argmin(diff)]].append(nan_id)
+
+					#Using the nans_include variable, determine what we're dealing with
+					if list(nans_include.keys()) == ['']:
+						no_id = np.array([''])
+
+					#Cycle through each of the instruments
+					for ids in no_id:
+						#Isolate the relevant profiles (plus nans)
+						dup_instrID[np.isin(flagged_index,nans_include[ids])] = ids
+						fi_id = flagged_index[dup_instrID == ids]
+						fs_id = flagged_source[dup_instrID == ids]
+
+						#Determine the number of temperature and salinity measurements in each
+						temp = ds_merged.temperature[fi_id].values
+						saln = ds_merged.salinity[fi_id].values
+						#Determine the number of recordings in each cast
+						nom_temp = (~np.isnan(temp)).sum(axis=1)
+						nom_saln = (~np.isnan(saln)).sum(axis=1)
+
+						#If climate and NAFC_oceanography are present, take climate
+						if fs_id.size == 1:
+							continue
+						if fs_id.size == 2:
+							if np.isin('Climate',fs_id) and np.isin('NAFC-Oceanography',fs_id):
+								duplicates_flag[fi_id[fs_id == 'NAFC-Oceanography']] = True
+								continue
+							#If NAFC_oceanography and CIOOS_NAFC are present, take CIOOS_NAFC
+							elif np.isin('CIOOS_NAFC',fs_id) and np.isin('NAFC-Oceanography',fs_id):
+								duplicates_flag[fi_id[fs_id == 'NAFC-Oceanography']] = True
+								continue
+							#If anything and BIO-OMM are present, take anything
+							elif np.isin(fs_id,'BIO-OMM').sum() == 1:
+								duplicates_flag[fi_id[fs_id == 'BIO-OMM']] = True
+								continue
+							else:
+								None
+
+						#If Climate is present
+						if np.isin('Climate',fs_id):
+
+							#If Climate is present once
+							if np.isin(fs_id,'Climate').sum() == 1:
+								#If the Climate location has at least 90% of recordings, keep
+								clim_place1 = {}
+								place1 = {}
+
+								#Determine the number of recordings in all spots
+								for ii,value in enumerate(fs_id):
+									if value != 'Climate':
+										place1[ii] = int(nom_temp[ii] + nom_saln[ii])
+									else:
+										clim_place1[value] = int(nom_temp[ii] + nom_saln[ii])
+
+								#Determine if Climate has enough to be kept (90% of others)
+								place1_check = np.zeros(fs_id.size).astype(bool)
+								x = 0
+								for ii,value in enumerate(fs_id):
+									if value != 'Climate':
+
+										#Check number of measurements
+										if place1[ii]*0.9 > clim_place1['Climate']:
+											place1_check[x] = True
+										x += 1
+
+								#If all aren't, keep Climate, discard others
+								if not any(place1_check):
+									duplicates_flag[fi_id[~(fs_id == 'Climate')]] = True
+
+								#Else take the cast with the highest number
+								else:
+									duplicates_flag[fi_id[fi_id != fi_id[np.argmax(nom_temp+nom_saln)]]] = True
+
+							#If Climate is the only source present
+							elif np.isin(fs_id,'Climate').all():
+								duplicates_flag[fi_id[fi_id != fi_id[np.argmax(nom_temp+nom_saln)]]] = True
+
+							#If Climate is present more than twice, but other variables are present
+							else:
+								#If the Climate location has at least 90% of recordings, keep
+								clim_place1 = {}
+								place1 = {}
+
+								#Determine the number of recordings in all  spots
+								for ii,value in enumerate(fs_id):
+									if value != 'Climate':
+										place1[ii] = int(nom_temp[ii] + nom_saln[ii])
+									else:
+										clim_place1[ii] = int(nom_temp[ii] + nom_saln[ii])
+
+								#Determine which group has the highest number
+								place1_winner = np.max([place1[ii]*0.9 for ii in place1])
+								clim_place1_winner = np.max([clim_place1[ii] for ii in clim_place1])
+
+								#If place1 group is higher
+								if place1_winner > clim_place1_winner:
+									duplicates_flag[fi_id[fi_id != fi_id[np.argmax(nom_temp+nom_saln)]]] = True
+
+								#If clim_place1 group is higher
+								else:
+									place1 = np.argmax((nom_temp+nom_saln)[fs_id == 'Climate'])
+									#Remove the non-Climate casts
+									duplicates_flag[fi_id[np.isin(fi_id,fi_id[fs_id == 'Climate'],invert=True)]] = True
+									#Remove the Climate casts that didn't win
+									duplicates_flag[fi_id[fs_id == 'Climate'][fi_id[fs_id == 'Climate'] != fi_id[fs_id == 'Climate'][place1]]] = True
+
+						#If Climate is not present
+						else:
+							#Determine which cast has the highest number of measurements and keep that one
+							duplicates_flag[fi_id[fi_id != fi_id[np.argmax(nom_temp+nom_saln)]]] = True
 
 		#Remove the duplicates from the ds
 		ds_merged = ds_merged.sel(time=~duplicates_flag)
@@ -927,7 +1083,11 @@ def station_check(
 		ds.attrs['Conventions'] = 'CF-1.6'
 		ds.attrs['doi'] = '10.20383/102.0739'
 		ds.attrs['creator_names'] = 'Jonathan Coyne, Frederic Cyr'
+<<<<<<< HEAD
 		ds.attrs['creator_emails'] = 'jonathan.coyne@dfo-mpo.gc.ca, frederic.cyr@mi.mun.ca'
+=======
+		ds.attrs['creator_emails'] = 'jonathan.coyne@dfo-mpo.gc.ca, frederic.cyr@dfo-mpo.gc.ca'
+>>>>>>> c02fff5785270773b3117f066306cde63cd84fc4
 		ds.attrs['geospatial_lon_max'] = '-42degE'
 		ds.attrs['geospatial_lon_min'] = '-100degE'
 		ds.attrs['geospatial_lat_min'] = '35degN'
