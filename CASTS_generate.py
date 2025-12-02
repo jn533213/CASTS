@@ -44,7 +44,7 @@ directory = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/'
 #Update yearly
 
 #Define the years of interest
-years = np.arange(1912,2023+1).astype(str)
+years = np.arange(1912,2025+1).astype(str)
 
 #Cycle through each year
 for year in years[:]:
@@ -164,13 +164,13 @@ print('BIO Climate post-2010 -> yearly netcdf done!')
 #Update yearly
 
 #Download all files
-file_input = directory+'Data_Input/CIOOS_ERDDAP/data_raw/Jan_2025/'
-years = np.arange(1993,2024+1).astype(str)
-years_azmp = np.arange(1997,2024+1).astype(str)
+file_input = directory+'Data_Input/CIOOS_ERDDAP/data_raw/Oct_2025/'
+years = np.arange(1969,2025+1).astype(str)
+years_azmp = np.arange(1997,2025+1).astype(str)
 CIOOS_ERDDAP.download_AZMP(file_input,years_azmp)
-years_azomp = np.concatenate([np.arange(1993,2016+1),np.arange(2018,2020+1),np.arange(2022,2024+1)]).astype(str)
+years_azomp = np.concatenate([np.arange(1993,2016+1),np.arange(2018,2020+1),np.arange(2022,2025+1)]).astype(str)
 CIOOS_ERDDAP.download_AZOMP(file_input,years_azomp)
-years_ecosystems = np.arange(1996,2024+1).astype(str)
+years_ecosystems = np.arange(1996,2025+1).astype(str)
 CIOOS_ERDDAP.download_ecosystems(file_input,years_ecosystems)
 
 #Mesh individual files together
@@ -200,7 +200,7 @@ print('IEO Spain -> yearly netcdf done!')
 
 #Download the data of interest
 file_input = directory+'Data_Input/NCEI_GTSPP/data_raw/'
-year = '2024'
+year = '2025'
 NCEI_GTSPP.download_data(year,file_input)
 
 #Merge individual files
@@ -247,10 +247,16 @@ print('Polar Data Catalogue -> yearly netcdf done!')
 #10. World Ocean Database
 #Update yearly (there's a website)
 
-#Convert the folders to netcdf
+#Convert the folders to netcdf, early data
 file_input = directory+'Data_Input/Data_Input/WOD/OSD_MBT/'
 file_output = directory+'Data_Input/WOD/data_processed/'
 WOD.merge_netcdf(file_input,file_output)
+#Convert the nc file for 2008-2018
+file_input = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/WOD/2008_2018/'
+file_output = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/WOD/2008_2018/netcdf_files/'
+WOD.merge_netcdf(file_input+'CTD/',file_output+'CTD/',instr_id='CTD')
+WOD.merge_netcdf(file_input+'OSD/',file_output+'OSD/',instr_id='OSD')
+WOD.merge_netcdf(file_input+'PFL/',file_output+'PFL/',instr_id='PFL')
 print('World Ocean Database (WOD) -> yearly netcdf done!')
 
 
@@ -276,6 +282,9 @@ path['path12'] = directory+'Data_Input/IEO_Spain/netcdf_yearly/' # IEO Spain, 20
 path['path13'] = directory+'Data_Input/IEO_Spain/netcdf_yearly/EU_NAFO/' # IEO Spain, 1988-2020
 path['path14'] = directory+'Data_Input/Other/Freds_Files/netcdf_yearly/' #Marine Institute, 2000-2008
 path['path15'] = directory+'Data_Input/WOD/data_processed/' #World Ocean Database, 1873-1910
+path['path16'] = directory+'Data_Input/WOD/2008_2018/netcdf_files/CTD/' #World Ocean Database, 2008-2018, CTD
+path['path17'] = directory+'Data_Input/WOD/2008_2018/netcdf_files/OSD/' #World Ocean Database, 2008-2018, OSD
+path['path18'] = directory+'Data_Input/WOD/2008_2018/netcdf_files/PFL/' #World Ocean Database, 2008-2018, PFL
 path_source = {}
 path_source['path1'] = 'Climate'
 path_source['path2'] = 'BIO-OMM'
@@ -292,7 +301,10 @@ path_source['path12'] = 'EU-NAFO'
 path_source['path13'] = 'EU-NAFO'
 path_source['path14'] = 'Marine-Institute-NL'
 path_source['path15'] = 'WOD'
-years=np.arange(1873,2024+1).astype(str)
+path_source['path16'] = 'WOD'
+path_source['path17'] = 'WOD'
+path_source['path18'] = 'WOD'
+years=np.arange(1873,2025+1).astype(str)
 file_output=directory+'Data_Products/1_combined_raw/'
 CASTS_combined.combine_netcdf(path,path_source,years,file_output)
 

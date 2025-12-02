@@ -121,6 +121,16 @@ def combine_netcdf(
 				ds[i] = ds[i].rename({'instrument_id': 'instrument_type'})
 			if i == 'path14':
 				ds[i] = ds[i].rename({'mission_id': 'trip_ID'})
+			if i == 'path16':
+				ds[i] = ds[i].rename({'instrument_id': 'instrument_ID'})
+				ds[i] = ds[i].rename({'cruise_id': 'trip_ID'})
+			if i == 'path17':
+				ds[i] = ds[i].rename({'instrument_id': 'instrument_ID'})
+				ds[i] = ds[i].rename({'cruise_id': 'trip_ID'})
+			if i == 'path18':
+				ds[i] = ds[i].rename({'instrument_id': 'instrument_ID'})
+				ds[i] = ds[i].rename({'cruise_id': 'trip_ID'})
+
 
 		#Isolate for the variables of interest
 		variables = np.array([
@@ -146,7 +156,6 @@ def combine_netcdf(
 			if np.isin(variables,list(ds[i].variables)).all() == False:
 				for ii in variables[~np.isin(variables,list(ds[i].variables))]:
 					ds[i][ii] = (['time'], np.full(ds[i].time.size, np.nan).astype(str))
-
 
 		#Merge all of the variables together
 		ds_merged = xr.concat([ds[i] for i in ds.keys()],dim='time',combine_attrs='override')
@@ -203,6 +212,9 @@ def combine_netcdf(
 
 				#Determine where all three criteras are met
 				flagged_casts = time_diff*lat_diff*lon_diff
+				#flagged_source = ds_merged.source[flagged_casts].values
+				#if np.isin('BIO-OMM',flagged_source) and flagged_casts.sum() > 2:
+				#	test[i] = True
 
 				#Determine if there are duplicates present, if so proceed
 				if flagged_casts.sum() > 1:
@@ -210,6 +222,13 @@ def combine_netcdf(
 					#Determine the corresponding sources, index
 					flagged_source = ds_merged.source[flagged_casts].values
 					flagged_index = np.where(flagged_casts == True)[0]
+
+					#If more than 2 measurements, immediately remove BIO-OMM if present
+					if flagged_source.size > 2 and np.isin('BIO-OMM',flagged_source) and np.unique(flagged_source).size > 1:
+						duplicates_flag[flagged_index[flagged_source == 'BIO-OMM']] = True
+						flagged_casts[flagged_index[flagged_source == 'BIO-OMM']] = False
+						flagged_index = flagged_index[flagged_source != 'BIO-OMM']
+						flagged_source = flagged_source[flagged_source != 'BIO-OMM']
 
 					#Determine the number of temperature and salinity measurements in each
 					temp = ds_merged.temperature[flagged_casts].values
@@ -229,9 +248,9 @@ def combine_netcdf(
 						if np.isin('CIOOS_NAFC',flagged_source) and np.isin('NAFC-Oceanography',flagged_source):
 							duplicates_flag[flagged_index[flagged_source == 'NAFC-Oceanography']] = True
 
-					#If CIOOS-BIO and BIO-OMM are present, take CIOOS_BIO
+					#If BIO-OMM is present at all, remove
 					if flagged_source.size == 2:
-						if np.isin('CIOOS_BIO',flagged_source) and np.isin('BIO-OMM',flagged_source):
+						if np.isin('BIO-OMM',flagged_source):
 							duplicates_flag[flagged_index[flagged_source == 'BIO-OMM']] = True
 
 					#If Climate is present
@@ -281,7 +300,7 @@ def combine_netcdf(
 							clim_place1 = {}
 							place1 = {}
 							
-							#Determine the number of recordings in all  spots
+							#Determine the number of recordings in all spots
 							for ii,value in enumerate(flagged_source):
 								if value != 'Climate':
 									place1[ii] = int(nom_temp[ii] + nom_saln[ii])
@@ -907,8 +926,8 @@ def station_check(
 		ds.attrs['comment'] = 'This work is licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/.'
 		ds.attrs['Conventions'] = 'CF-1.6'
 		ds.attrs['doi'] = '10.20383/102.0739'
-		ds.attrs['creator_names'] = 'Frederic Cyr, Jonathan Coyne'
-		ds.attrs['creator_emails'] = 'frederic.cyr@dfo-mpo.gc.ca, jonathan.coyne@dfo-mpo.gc.ca'
+		ds.attrs['creator_names'] = 'Jonathan Coyne, Frederic Cyr'
+		ds.attrs['creator_emails'] = 'jonathan.coyne@dfo-mpo.gc.ca, frederic.cyr@mi.mun.ca'
 		ds.attrs['geospatial_lon_max'] = '-42degE'
 		ds.attrs['geospatial_lon_min'] = '-100degE'
 		ds.attrs['geospatial_lat_min'] = '35degN'

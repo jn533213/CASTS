@@ -27,6 +27,7 @@ def merge_netcdf(
 	file_input,
 	file_output,
 	max_depth=5000,
+	instr_id=''
 	):
 	'''
 	file_input: input location for .nc files
@@ -47,10 +48,10 @@ def merge_netcdf(
 	saln = np.full([np.size(file_name),max_depth],np.nan)
 	lat = np.full(np.size(file_name),np.nan)
 	lon = np.full(np.size(file_name),np.nan)
-	time = np.empty(np.size(file_name),dtype='datetime64[ns]')
+	time = np.empty(np.size(file_name),dtype='datetime64[m]')
 	years = np.empty(np.size(file_name),dtype=int)
-	instrument_id = np.empty(np.size(file_name),dtype='U40')
-	source = np.full(np.size(file_name),'WOD_OSD')
+	instrument_id = np.empty(np.size(file_name),dtype='U70')
+	source = np.full(np.size(file_name),'WOD')
 	cruise_id = np.empty(np.size(file_name),dtype='U40')
 	platform_id = np.empty(np.size(file_name),dtype='U80')
 
@@ -79,6 +80,8 @@ def merge_netcdf(
 			cruise_id[i] = str(ds.WOD_cruise_identifier.values.astype(str))
 		if np.isin('Temperature_Instrument',list(ds.variables)):
 			instrument_id[i] = str(ds.Temperature_Instrument.values.astype(str))
+		else:
+			instrument_id[i] = instr_id
 		if np.isin('Platform',list(ds.variables)):
 			platform_id[i] = str(ds.Platform.values.astype(str))
 
@@ -153,7 +156,7 @@ def merge_netcdf(
 		latitudes[:] = lat[year_filt]
 		longitudes[:] = lon[year_filt]
 		times[:] = time[year_filt]
-		file_names[:] = file_name[year_filt]
+		file_names[:] = np.array(file_name)[year_filt]
 		cruise_ids[:] = cruise_id[year_filt]
 		instrument_ids[:] = instrument_id[year_filt]
 		platform_ids[:] = platform_id[year_filt]
