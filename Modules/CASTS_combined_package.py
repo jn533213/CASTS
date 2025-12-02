@@ -130,6 +130,9 @@ def combine_netcdf(
 			if i == 'path18':
 				ds[i] = ds[i].rename({'instrument_id': 'instrument_ID'})
 				ds[i] = ds[i].rename({'cruise_id': 'trip_ID'})
+			if i == 'path19':
+				ds[i] = ds[i].rename({'project_name': 'trip_ID'})
+				ds[i] = ds[i].rename({'platform_type': 'instrument_ID'})
 
 
 		#Isolate for the variables of interest
@@ -265,7 +268,6 @@ def combine_netcdf(
 					no_id = np.unique(dup_instrID)
 					no_id = no_id[no_id != ''] #remove instances of no instrument ID specified
 
-<<<<<<< HEAD
 					#If NAFC_oceanography and CIOOS_NAFC are present, take CIOOS_NAFC
 					if flagged_source.size == 2:
 						if np.isin('CIOOS_NAFC',flagged_source) and np.isin('NAFC-Oceanography',flagged_source):
@@ -347,7 +349,6 @@ def combine_netcdf(
 								duplicates_flag[flagged_index[flagged_source == 'Climate'][flagged_index[flagged_source == 'Climate'] != flagged_index[flagged_source == 'Climate'][place1]]] = True
 
 					#If Climate is not present
-=======
 					#Determine which instrument nans should included with
 					if np.sum(dup_instrID == '').sum() == 0:
 						nans_include = {}
@@ -357,7 +358,6 @@ def combine_netcdf(
 						nans_include = {'':flagged_index}
 					elif no_id.size == 1:
 						nans_include = {no_id[0]:flagged_index[dup_instrID == '']}
->>>>>>> c02fff5785270773b3117f066306cde63cd84fc4
 					else:
 						#Determine where all the nans are
 						nan_index = flagged_index[dup_instrID == '']
@@ -1083,11 +1083,8 @@ def station_check(
 		ds.attrs['Conventions'] = 'CF-1.6'
 		ds.attrs['doi'] = '10.20383/102.0739'
 		ds.attrs['creator_names'] = 'Jonathan Coyne, Frederic Cyr'
-<<<<<<< HEAD
 		ds.attrs['creator_emails'] = 'jonathan.coyne@dfo-mpo.gc.ca, frederic.cyr@mi.mun.ca'
-=======
 		ds.attrs['creator_emails'] = 'jonathan.coyne@dfo-mpo.gc.ca, frederic.cyr@dfo-mpo.gc.ca'
->>>>>>> c02fff5785270773b3117f066306cde63cd84fc4
 		ds.attrs['geospatial_lon_max'] = '-42degE'
 		ds.attrs['geospatial_lon_min'] = '-100degE'
 		ds.attrs['geospatial_lat_min'] = '35degN'

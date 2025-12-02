@@ -42,8 +42,8 @@ def download_Argo(
 		year_1 = year
 		year_2 = str(int(year))
 		#Cycle through each month, otherwise download may time out
-		#months = np.arange(1,12+1).astype(str)
-		months = np.array(['12'])
+		months = np.arange(1,12+1).astype(str)
+		#months = np.array(['12'])
 		for month in months:
 			month_1 = month.zfill(2)
 			if month_1 == '12':

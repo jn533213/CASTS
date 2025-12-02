@@ -23,7 +23,9 @@ import NCEI_GTSPP_package as NCEI_GTSPP
 import NEFSC_package as NEFSC
 import Polar_Data_Catalogue_package as Polar_Data_Catalogue
 import WOD_package as WOD
+import Argo_Float_package as ARGO_Float
 import CASTS_combined_package as CASTS_combined
+
 
 '''
 This is the central CASTS script.
@@ -260,6 +262,22 @@ WOD.merge_netcdf(file_input+'PFL/',file_output+'PFL/',instr_id='PFL')
 print('World Ocean Database (WOD) -> yearly netcdf done!')
 
 
+
+##########################################################################################################
+#11. ARGO
+#Update yearly (through the function)
+
+#Download the data of interest
+years = np.arange(2000,2025+1).astype(str)
+file_input = directory+'Data_Input/Argo_Float/data_raw/'
+file_output = directory+'Data_Input/Argo_Float/data_processed/'
+ARGO_Float.download_Argo(file_input,years)
+#Convert the nc file
+ARGO_Float.merge_netcdf(file_input,file_output,years)
+print('ARGO -> yearly netcdf done!')
+
+
+
 ##########################################################################################################
 '''----------------------------------------------------------------------------------------------------'''
 ##########################################################################################################
@@ -285,6 +303,7 @@ path['path15'] = directory+'Data_Input/WOD/data_processed/' #World Ocean Databas
 path['path16'] = directory+'Data_Input/WOD/2008_2018/netcdf_files/CTD/' #World Ocean Database, 2008-2018, CTD
 path['path17'] = directory+'Data_Input/WOD/2008_2018/netcdf_files/OSD/' #World Ocean Database, 2008-2018, OSD
 path['path18'] = directory+'Data_Input/WOD/2008_2018/netcdf_files/PFL/' #World Ocean Database, 2008-2018, PFL
+path['path19'] = directory+'Data_Input/Argo_Float/data_processed/' #ARGO, 2000-2025
 path_source = {}
 path_source['path1'] = 'Climate'
 path_source['path2'] = 'BIO-OMM'
@@ -304,6 +323,7 @@ path_source['path15'] = 'WOD'
 path_source['path16'] = 'WOD'
 path_source['path17'] = 'WOD'
 path_source['path18'] = 'WOD'
+path_source['path19'] = 'ARGO'
 years=np.arange(1873,2025+1).astype(str)
 file_output=directory+'Data_Products/1_combined_raw/'
 CASTS_combined.combine_netcdf(path,path_source,years,file_output)
