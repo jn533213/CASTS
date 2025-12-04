@@ -965,14 +965,14 @@ def station_check(
 
 		#Organize instrument ID into categories
 		instrument_call = {}
-		instrument_call['CT'] = ['19899','19P-7','19P45','19P53','GL','OLABS','STD12','NBmun','0CTD','0CTD1','1CTD','1CTD1','CD','CT','CTD','CU','FAPCD','FAPCU','GLCTD','GLctd','MEDCD','S0000','S0002','S0036','S0038','S0078','S0097','S0103','S0118','S0129','S0212','S0277','S0281','S0344','S0394','S0454','S0466','S0580','S0582','S0583','S0674','S0688','S0689','S0690','S0691','S0692','S0758','S0803','S0845','S0846','S0847','S0910','S0911','S0912','S0935','S1003','S1019','S1020','S1021','S1098','S1101','S1145','S1146','S1221','S1237','S1238','S1247','S1257','S1308','S1309','S1310','S1311','S1312','S1313','S1314','S1315','S1316','S1317','S1318','S1319','S1460','S2245','S2246','S2247','S2248','S4016','S4017','S4018','S4019','S4020','S4578','S4579','S4580','S4581','S4582','S4776','S4777','S5117','S7849','S7853','S7854','S7855','S7992','S8013','S8014','S9999','SB', 'SB002', 'SB036', 'SB038','SB12','SB279','SB280','SB394','SB450','SB453','SB454','SB455','SB580','SB581','SB583','SB688','SB689','SB690','SB691','SB692','SB73','SB74','SB81','SB82','SB822','SB83','SB845','SB880','SB890','SB900','SB910','SB920','SB935','SBMUN']
+		instrument_call['CT'] = ['19899','19P-7','19P45','19P53','GL','OLABS','STD12','NBmun','0CTD','0CTD1','1CTD','1CTD1','CD','CT','CTD','CU','FAPCD','FAPCU','GLCTD','GLctd','MEDCD','S0000','S0002','S0036','S0038','S0078','S0097','S0103','S0118','S0129','S0212','S0277','S0281','S0344','S0394','S0454','S0466','S0580','S0582','S0583','S0674','S0688','S0689','S0690','S0691','S0692','S0758','S0803','S0845','S0846','S0847','S0910','S0911','S0912','S0935','S1003','S1019','S1020','S1021','S1098','S1101','S1145','S1146','S1221','S1237','S1238','S1247','S1257','S1308','S1309','S1310','S1311','S1312','S1313','S1314','S1315','S1316','S1317','S1318','S1319','S1460','S2245','S2246','S2247','S2248','S4016','S4017','S4018','S4019','S4020','S4578','S4579','S4580','S4581','S4582','S4776','S4777','S5117','S7849','S7853','S7854','S7855','S7992','S8013','S8014','S9999','SB', 'SB002', 'SB036', 'SB038','SB12','SB279','SB280','SB394','SB450','SB453','SB454','SB455','SB580','SB581','SB583','SB688','SB689','SB690','SB691','SB692','SB73','SB74','SB81','SB82','SB822','SB83','SB845','SB880','SB890','SB900','SB910','SB920','SB935','SBMUN','CTD: SBE 19 SEACAT profiler (Sea-Bird Electronics, Inc.)','CTD: SBE 19plus SEACAT profiler (Sea-Bird Electronics, Inc.)','CTD: SBE 19plus V2 SeaCAT Profiler (Sea-Bird Electronics, Inc.)','CTD: SBE 25 SEALOGGER (Sea-Bird Electronics, Inc.)','CTD: SBE 9 (Deep ocean precision CTD, Sea-Bird Electronics, Inc.)','CTD: SBE 911plus (Sea-Bird Electronics, Inc.)','CTD: TYPE UNKNOWN','CTD: UnderwayCTD (Oceanscience)']
 		instrument_call['BO'] = ['BO','FAPBO','FAPbo','FRCBO']
 		instrument_call['BF'] = ['BF','FAPBF']
 		instrument_call['TO'] = ['TO','FAPTO']
 		instrument_call['DT'] = ['DT','BT']
-		instrument_call['MB'] = ['MB']
+		instrument_call['MB'] = ['MB','MBT: TYPE UNKNOWN']
 		instrument_call['XB'] = ['XB','XBT05','XBT06','XBT07','XBT10']
-		instrument_call['PF'] = ['PF','B3']
+		instrument_call['PF'] = ['PF','B3','ALTO','APEX','APEX-SBE','ARVOR','ARVOR_D','NAVIS_A','NAVIS_EBR','NOVA','NOVA-SBE','PROVOR','PROVOR-SBE','PROVOR_III','PROVOR_IV','PROVOR_V','PROVOR_V_JUMBO','S2A','SOLO','SOLO-W','SOLO_D_MRV','SOLO_W','ARGO: TYPE UNKNOWN']
 		instrument_call[''] = ['nan','21573.0']
 
 		#Define the new instrument_ID data
