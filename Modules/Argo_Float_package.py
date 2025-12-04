@@ -127,6 +127,7 @@ def merge_netcdf(
 							print(var+', profile #'+str(i)+' has more than one unique value in one profile.')
 					var_1D_dict[title][var] = np.array([i[0] for i in var_1D_dict[title][var]])
 				var_1D_dict[title]['file_name'] = np.tile(title, n.shape)
+				var_1D_dict[title]['platform_type'][var_1D_dict[title]['platform_type'] == ''] = 'ARGO: TYPE UNKNOWN'
 
 				#Process the 2D variables
 				var_2D = ['temp','psal']

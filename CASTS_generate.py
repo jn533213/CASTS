@@ -259,6 +259,7 @@ file_output = '/gpfs/fs7/dfo/dpnm/joc000/Data/CASTS/Data_Input/WOD/2008_2018/net
 WOD.merge_netcdf(file_input+'CTD/',file_output+'CTD/',instr_id='CTD')
 WOD.merge_netcdf(file_input+'OSD/',file_output+'OSD/',instr_id='OSD')
 WOD.merge_netcdf(file_input+'PFL/',file_output+'PFL/',instr_id='PFL')
+WOD.merge_netcdf(file_input+'UOR/',file_output+'UOR/',instr_id='UOR')
 print('World Ocean Database (WOD) -> yearly netcdf done!')
 
 
