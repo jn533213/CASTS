@@ -131,6 +131,9 @@ def combine_netcdf(
 				ds[i] = ds[i].rename({'instrument_id': 'instrument_ID'})
 				ds[i] = ds[i].rename({'cruise_id': 'trip_ID'})
 			if i == 'path19':
+				ds[i] = ds[i].rename({'instrument_id': 'instrument_ID'})
+				ds[i] = ds[i].rename({'cruise_id': 'trip_ID'})
+			if i == 'path20':
 				ds[i] = ds[i].rename({'project_name': 'trip_ID'})
 				ds[i] = ds[i].rename({'platform_type': 'instrument_ID'})
 

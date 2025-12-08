@@ -125,7 +125,10 @@ def merge_netcdf(
 					for i,value in enumerate(var_1D_dict[title][var]):
 						if np.unique(value).size > 1:
 							print(var+', profile #'+str(i)+' has more than one unique value in one profile.')
-					var_1D_dict[title][var] = np.array([i[0] for i in var_1D_dict[title][var]])
+					if var == 'platform_type':
+						var_1D_dict[title][var] = np.array([i[0] for i in var_1D_dict[title][var]],dtype='<U30')
+					else:
+						var_1D_dict[title][var] = np.array([i[0] for i in var_1D_dict[title][var]])
 				var_1D_dict[title]['file_name'] = np.tile(title, n.shape)
 				var_1D_dict[title]['platform_type'][var_1D_dict[title]['platform_type'] == ''] = 'ARGO: TYPE UNKNOWN'
 
