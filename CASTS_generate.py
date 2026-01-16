@@ -57,7 +57,7 @@ for year in years[:]:
 	if int(year) < 2023:
 		NAFC_oceanography.convertpfile(input_folder+year+'/',output_folder+year+'.nc',year)
 	else:
-		NAFC_oceanography.convertcnv(input_folder,output_folder+year+'.nc',year)
+		NAFC_oceanography.convertcnv(input_folder+year+'/',output_folder+year+'.nc',year)
 	print(year+' -> raw file done!')
 
 	#Remove empties, problem MBT BO profiles
@@ -132,7 +132,7 @@ print('NAFC Aquaculture -> yearly netcdf done!')
 #Update yearly (with info from Jean-Luc)
 
 #Convert to yearly files
-file_input = directory+'Data_Input/IML/data_raw/2025_Aug/'
+file_input = directory+'Data_Input/IML/data_raw/2026_Jan/'
 file_output = directory+'Data_Input/IML/data_processed/'
 IML.raw_to_netcdf(file_input,file_output)
 print('IML -> yearly netcdf done!')
